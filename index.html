@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>DAYPROOF</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#000;color:#fff;font-family:'Arial Black','Impact','Helvetica Neue',Arial,sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:60px;}
+  input,textarea,button{font-family:inherit;}
+
+  /* LOGIN */
+  #loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:0 28px;gap:18px;}
+  .rule{width:100%;height:2px;background:#fff;}
+  #loginBrand{font-size:42px;font-weight:900;letter-spacing:8px;text-align:center;}
+  #mottoLogin{font-size:12px;font-weight:900;letter-spacing:3px;color:#888;text-align:center;min-height:20px;}
+  .loginSub{font-size:10px;letter-spacing:4px;color:#555;text-align:center;}
+  #nameInput{width:100%;background:#000;border:2px solid #fff;color:#fff;font-size:16px;font-weight:900;letter-spacing:2px;padding:14px 16px;outline:none;text-align:center;text-transform:uppercase;}
+  #enterBtn{width:100%;background:#fff;border:none;color:#000;font-size:14px;font-weight:900;letter-spacing:3px;padding:16px;cursor:pointer;}
+  .loginNote{font-size:10px;letter-spacing:1.5px;color:#444;text-align:center;line-height:1.7;}
+
+  /* APP */
+  #appScreen{display:none;}
+  #header{display:flex;justify-content:space-between;align-items:center;padding:22px 18px 12px;border-bottom:2px solid #fff;}
+  #brand{font-size:22px;font-weight:900;letter-spacing:6px;}
+  #dateLabel{font-size:9px;letter-spacing:2px;color:#555;margin-top:3px;}
+  #headerRight{display:flex;align-items:center;gap:12px;}
+  #avatarBox{width:36px;height:36px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;letter-spacing:1px;}
+  #streakBox{text-align:center;}
+  #streakNum{font-size:22px;font-weight:900;line-height:1;}
+  #streakLabel{font-size:8px;letter-spacing:2px;color:#555;}
+  #mottoBar{background:#fff;padding:10px 18px;border-bottom:2px solid #000;}
+  #mottoText{font-size:11px;font-weight:900;letter-spacing:3px;color:#000;display:block;text-align:center;}
+  #progressRow{display:flex;align-items:center;gap:20px;padding:20px 18px 12px;border-bottom:1px solid #1a1a1a;}
+  #ringWrap{position:relative;width:84px;height:84px;flex-shrink:0;}
+  #ringInner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  #ringPct{font-size:16px;font-weight:900;}
+  #progressFrac{font-size:36px;font-weight:900;line-height:1;}
+  #progressLabel{font-size:9px;letter-spacing:3px;color:#555;margin-top:4px;}
+  #progressWin{font-size:11px;letter-spacing:1px;margin-top:6px;font-weight:900;display:none;}
+
+  /* TABS */
+  #tabRow{display:flex;border-bottom:2px solid #fff;}
+  .tab{flex:1;background:#000;border:none;border-right:1px solid #222;color:#555;font-size:10px;font-weight:900;letter-spacing:2px;padding:12px 4px;cursor:pointer;}
+  .tab.active{background:#fff;color:#000;}
+
+  /* LIST */
+  #listArea{padding:10px 14px;display:flex;flex-direction:column;gap:4px;}
+  .slot{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #1a1a1a;}
+  .slot.hasTask{border-color:#333;}
+  .slot.done{border-color:#fff;background:#0a0a0a;}
+  .slot.blank{opacity:0.25;}
+  .slotHour{font-family:monospace;font-size:10px;color:#555;min-width:68px;letter-spacing:1px;}
+  .slotName{flex:1;font-size:12px;font-weight:900;letter-spacing:1px;}
+  .slotActions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+  .doneCheck{color:#fff;font-weight:900;font-size:16px;}
+  .thumb{width:30px;height:30px;object-fit:cover;border:1px solid #fff;cursor:pointer;}
+  .undoBtn{background:none;border:1px solid #333;color:#555;font-size:8px;padding:3px 7px;cursor:pointer;font-weight:900;letter-spacing:1px;}
+  .addProofBtn{background:#fff;border:none;color:#000;font-size:9px;font-weight:900;letter-spacing:1px;padding:5px 10px;cursor:pointer;white-space:nowrap;}
+
+  /* SETUP */
+  .setupHint{font-size:9px;letter-spacing:3px;color:#555;padding:4px 2px 8px;}
+  .setupRow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #111;}
+  .setupInput{flex:1;background:#000;border:1px solid #222;color:#fff;font-size:12px;font-weight:900;letter-spacing:1px;padding:8px 10px;outline:none;text-transform:uppercase;}
+
+  /* FEED */
+  #feedTop{display:flex;justify-content:space-between;align-items:center;}
+  #refreshBtn{background:none;border:1px solid #333;color:#555;font-size:9px;letter-spacing:2px;padding:4px 10px;cursor:pointer;font-weight:900;}
+  #feedMsg{text-align:center;color:#555;padding:24px;font-size:11px;letter-spacing:3px;}
+  #feedEmpty{text-align:center;padding:40px 20px;display:none;}
+  .feedEmptyTitle{font-size:18px;font-weight:900;letter-spacing:4px;margin-bottom:8px;}
+  .feedEmptySub{font-size:10px;letter-spacing:3px;color:#555;}
+  .feedCard{display:flex;gap:12px;align-items:center;border:1px solid #222;padding:12px;cursor:pointer;margin-bottom:4px;}
+  .feedCardThumb{width:64px;height:64px;object-fit:cover;border:1px solid #fff;flex-shrink:0;}
+  .feedMeta{flex:1;}
+  .feedUser{font-size:10px;letter-spacing:3px;color:#555;margin-bottom:3px;}
+  .feedTask{font-size:14px;font-weight:900;letter-spacing:1px;margin-bottom:3px;}
+  .feedTime{font-size:9px;letter-spacing:2px;color:#444;font-family:monospace;}
+  .feedNote{font-size:10px;color:#666;font-style:italic;margin-top:4px;}
+  .feedArrow{font-size:22px;color:#333;flex-shrink:0;}
+
+  /* MODAL */
+  #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);align-items:flex-end;justify-content:center;z-index:100;}
+  #overlay.show{display:flex;}
+  #modal{background:#000;border:2px solid #fff;border-bottom:none;padding:24px 20px 40px;width:100%;max-width:480px;display:flex;flex-direction:column;gap:12px;}
+  #modalEyebrow{font-size:9px;letter-spacing:4px;color:#555;}
+  #modalTitle{font-size:20px;font-weight:900;letter-spacing:2px;line-height:1.2;}
+  #modalTime{font-size:10px;letter-spacing:3px;color:#555;font-family:monospace;}
+  .modalRule{height:1px;background:#222;margin:2px 0;}
+  #uploadLabel{display:flex;flex-direction:column;align-items:center;gap:10px;border:2px dashed #333;padding:30px 20px;cursor:pointer;background:#050505;}
+  #uploadIcon{font-size:28px;color:#555;}
+  #uploadText{font-size:10px;letter-spacing:3px;color:#555;}
+  #proofPreviewWrap{display:none;flex-direction:column;gap:8px;align-items:center;}
+  #proofPreviewImg{width:100%;max-height:260px;object-fit:cover;border:1px solid #fff;}
+  #changePhotoLabel{background:none;border:1px solid #333;color:#555;font-size:9px;letter-spacing:2px;padding:5px 14px;cursor:pointer;font-weight:900;display:inline-block;}
+  #noteInput{background:#000;border:1px solid #222;color:#fff;font-size:12px;font-weight:900;letter-spacing:1px;padding:10px 12px;resize:none;outline:none;width:100%;}
+  #doneBtn{background:#222;border:none;color:#444;font-size:14px;font-weight:900;letter-spacing:3px;padding:14px;cursor:not-allowed;width:100%;}
+  #doneBtn.ready{background:#fff;color:#000;cursor:pointer;}
+  #cancelBtn{background:none;border:none;color:#444;font-size:10px;letter-spacing:3px;cursor:pointer;text-align:center;font-weight:900;padding:4px;}
+
+  /* PROOF VIEWER */
+  #viewerOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);align-items:flex-end;justify-content:center;z-index:200;}
+  #viewerOverlay.show{display:flex;}
+  #viewer{background:#000;border:2px solid #fff;border-bottom:none;padding:24px 20px 40px;width:100%;max-width:480px;display:flex;flex-direction:column;gap:12px;}
+  #viewerEyebrow{font-size:9px;letter-spacing:4px;color:#555;}
+  #viewerTitle{font-size:20px;font-weight:900;letter-spacing:2px;}
+  #viewerImg{width:100%;max-height:340px;object-fit:cover;border:1px solid #fff;}
+  #viewerNote{font-size:12px;color:#888;font-style:italic;letter-spacing:1px;}
+  #viewerClose{background:none;border:none;color:#444;font-size:10px;letter-spacing:3px;cursor:pointer;text-align:center;font-weight:900;padding:4px;}
+
+  /* STREAK POP */
+  #streakPop{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#fff;color:#000;font-weight:900;font-size:12px;letter-spacing:3px;padding:12px 24px;z-index:300;white-space:nowrap;border:2px solid #000;box-shadow:4px 4px 0 #fff;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="rule"></div>
+  <div id="loginBrand">DAYPROOF</div>
+  <div class="rule"></div>
+  <div id="mottoLogin">MAKE YOURSELF USEFUL.</div>
+  <div class="loginSub">WHO ARE YOU?</div>
+  <input id="nameInput" placeholder="ENTER YOUR NAME" maxlength="20"/>
+  <button id="enterBtn">ENTER THE GRIND →</button>
+  <div class="loginNote">SHARE THIS LINK WITH YOUR FRIEND.<br>SAME APP. DIFFERENT NAMES.</div>
+  <div class="rule"></div>
+</div>
+
+<!-- APP -->
+<div id="appScreen">
+  <div id="header">
+    <div>
+      <div id="brand">DAYPROOF</div>
+      <div id="dateLabel"></div>
+    </div>
+    <div id="headerRight">
+      <div id="avatarBox">??</div>
+      <div id="streakBox">
+        <div id="streakNum">0</div>
+        <div id="streakLabel">DAYS</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mottoBar"><span id="mottoText">MAKE YOURSELF USEFUL.</span></div>
+
+  <div id="progressRow">
+    <div id="ringWrap">
+      <svg width="84" height="84" style="transform:rotate(-90deg)">
+        <circle cx="42" cy="42" r="36" stroke="#222" stroke-width="6" fill="none"/>
+        <circle id="ringArc" cx="42" cy="42" r="36" stroke="#fff" stroke-width="6" fill="none"
+          stroke-dasharray="226.2" stroke-dashoffset="226.2" stroke-linecap="butt"
+          style="transition:stroke-dashoffset 0.6s ease"/>
+      </svg>
+      <div id="ringInner"><span id="ringPct">0%</span></div>
+    </div>
+    <div>
+      <div id="progressFrac">0<span style="color:#444">/0</span></div>
+      <div id="progressLabel">TASKS CONQUERED</div>
+      <div id="progressWin">ALL DONE. RESPECT. 🖤</div>
+    </div>
+  </div>
+
+  <div id="tabRow">
+    <button class="tab active" onclick="switchTab('today')">TODAY</button>
+    <button class="tab" onclick="switchTab('setup')">SETUP</button>
+    <button class="tab" onclick="switchTab('feed')">FEED 👀</button>
+  </div>
+
+  <div id="listArea"></div>
+</div>
+
+<!-- PROOF MODAL -->
+<div id="overlay">
+  <div id="modal">
+    <div id="modalEyebrow">UPLOAD PROOF</div>
+    <div id="modalTitle">TASK NAME</div>
+    <div id="modalTime">5:00 AM</div>
+    <div class="modalRule"></div>
+    <label id="uploadLabel" for="fileInput">
+      <div id="uploadIcon">[ 📷 ]</div>
+      <div id="uploadText">TAP TO ADD PROOF PHOTO</div>
+    </label>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none"/>
+    <div id="proofPreviewWrap">
+      <img id="proofPreviewImg" src="" alt="proof"/>
+      <label id="changePhotoLabel" for="fileInput2">CHANGE PHOTO</label>
+      <input type="file" id="fileInput2" accept="image/*" capture="environment" style="display:none"/>
+    </div>
+    <textarea id="noteInput" placeholder="ADD A NOTE (OPTIONAL)..." rows="2"></textarea>
+    <button id="doneBtn" onclick="submitProof()">MARK AS DONE ✓</button>
+    <button id="cancelBtn" onclick="closeModal()">CANCEL</button>
+  </div>
+</div>
+
+<!-- PROOF VIEWER -->
+<div id="viewerOverlay" onclick="closeViewer()">
+  <div id="viewer" onclick="event.stopPropagation()">
+    <div id="viewerEyebrow"></div>
+    <div id="viewerTitle"></div>
+    <div class="modalRule"></div>
+    <img id="viewerImg" src="" alt="proof"/>
+    <div id="viewerNote"></div>
+    <button id="viewerClose" onclick="closeViewer()">CLOSE</button>
+  </div>
+</div>
+
+<!-- STREAK POP -->
+<div id="streakPop"></div>
+
+<script>
+const HOURS = Array.from({length:18},(_,i)=>i+5);
+const MOTTOS = [
+  "MAKE YOURSELF USEFUL.",
+  "MAKE YOURSELF DISCIPLINED.",
+  "MAKE YOUR DREAMS COME TRUE.",
+  "NO EXCUSES. ONLY RESULTS.",
+  "EARN YOUR REST."
+];
+const CIRC = 2*Math.PI*36;
+
+let username = "";
+let mySlots = [];
+let currentView = "today";
+let activeHour = null;
+let tempProof = null;
+let myStreak = 0;
+let mottoIdx = 0;
+let feedData = [];
+
+function getTodayKey(){return new Date().toISOString().slice(0,10);}
+function formatHour(h){if(h===0)return"12:00 AM";if(h<12)return h+":00 AM";if(h===12)return"12:00 PM";return(h-12)+":00 PM";}
+function getInitials(n){return n.slice(0,2).toUpperCase();}
+
+// Storage helpers
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k));}catch{return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+// Motto cycle
+setInterval(()=>{
+  mottoIdx=(mottoIdx+1)%MOTTOS.length;
+  document.getElementById("mottoLogin").textContent=MOTTOS[mottoIdx];
+  document.getElementById("mottoText").textContent=MOTTOS[mottoIdx];
+},3500);
+
+// Login
+document.getElementById("nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
+document.getElementById("enterBtn").onclick=login;
+
+function login(){
+  const n=document.getElementById("nameInput").value.trim().toUpperCase();
+  if(!n)return;
+  username=n;
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("appScreen").style.display="block";
+  document.getElementById("avatarBox").textContent=getInitials(n);
+  document.getElementById("dateLabel").textContent=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}).toUpperCase();
+
+  // Load slots
+  const saved=lsGet("slots:"+username+":"+getTodayKey());
+  mySlots=saved||HOURS.map(h=>({hour:h,task:"",done:false,proof:null,note:""}));
+
+  // Load streak
+  const s=lsGet("streak:"+username);
+  myStreak=s?s.streak:0;
+  document.getElementById("streakNum").textContent=myStreak;
+
+  renderView();
+}
+
+function switchTab(t){
+  currentView=t;
+  document.querySelectorAll(".tab").forEach((el,i)=>{
+    el.classList.toggle("active",["today","setup","feed"][i]===t);
+  });
+  if(t==="feed") loadFeed();
+  else renderView();
+}
+
+function saveSlots(){
+  lsSet("slots:"+username+":"+getTodayKey(),mySlots);
+}
+
+function renderView(){
+  if(currentView==="today") renderToday();
+  else if(currentView==="setup") renderSetup();
+  else renderFeedUI();
+  updateProgress();
+}
+
+function updateProgress(){
+  const active=mySlots.filter(s=>s.task.trim());
+  const done=active.filter(s=>s.done);
+  const pct=active.length>0?Math.round(done.length/active.length*100):0;
+  document.getElementById("ringPct").textContent=pct+"%";
+  document.getElementById("ringArc").setAttribute("stroke-dashoffset",CIRC-(pct/100)*CIRC);
+  document.getElementById("progressFrac").innerHTML=done.length+'<span style="color:#444">/'+active.length+'</span>';
+  document.getElementById("progressWin").style.display=pct===100?"block":"none";
+  // Check streak
+  if(pct===100 && active.length>0){
+    const s=lsGet("streak:"+username)||{streak:0,lastDay:null};
+    const today=getTodayKey();
+    if(s.lastDay!==today){
+      const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+      const yKey=yesterday.toISOString().slice(0,10);
+      const newStreak=s.lastDay===yKey?s.streak+1:1;
+      lsSet("streak:"+username,{streak:newStreak,lastDay:today});
+      myStreak=newStreak;
+      document.getElementById("streakNum").textContent=newStreak;
+      showStreakPop(newStreak);
+    }
+  }
+}
+
+function showStreakPop(n){
+  const el=document.getElementById("streakPop");
+  el.textContent="🔥 DAY "+n+" — DON'T STOP NOW.";
+  el.style.display="block";
+  setTimeout(()=>el.style.display="none",3000);
+}
+
+// TODAY
+function renderToday(){
+  const area=document.getElementById("listArea");
+  area.innerHTML="";
+  mySlots.forEach(slot=>{
+    const has=slot.task.trim()!=="";
+    const div=document.createElement("div");
+    div.className="slot"+(slot.done?" done":has?" hasTask":" blank");
+    div.innerHTML=`<div class="slotHour">${formatHour(slot.hour)}</div>
+      <div class="slotName">${has?slot.task:'<span style="color:#2a2a2a">—</span>'}</div>
+      <div class="slotActions" id="act${slot.hour}"></div>`;
+    area.appendChild(div);
+    const acts=document.getElementById("act"+slot.hour);
+    if(has){
+      if(slot.done){
+        if(slot.proof){
+          const img=document.createElement("img");
+          img.src=slot.proof;img.className="thumb";
+          img.onclick=()=>openViewer(slot);
+          acts.appendChild(img);
+        }
+        const chk=document.createElement("span");chk.className="doneCheck";chk.textContent="✓";
+        acts.appendChild(chk);
+        const ub=document.createElement("button");ub.className="undoBtn";ub.textContent="UNDO";
+        ub.onclick=()=>{slot.done=false;slot.proof=null;slot.note="";saveSlots();renderView();};
+        acts.appendChild(ub);
+      } else {
+        const pb=document.createElement("button");pb.className="addProofBtn";pb.textContent="+ PROOF";
+        pb.onclick=()=>openModal(slot.hour);
+        acts.appendChild(pb);
+      }
+    }
+  });
+}
+
+// SETUP
+function renderSetup(){
+  const area=document.getElementById("listArea");
+  area.innerHTML=`<div class="setupHint">WRITE YOUR MISSION FOR EACH HOUR.</div>`;
+  mySlots.forEach(slot=>{
+    const row=document.createElement("div");row.className="setupRow";
+    const lbl=document.createElement("div");lbl.className="slotHour";lbl.textContent=formatHour(slot.hour);
+    const inp=document.createElement("input");inp.className="setupInput";
+    inp.placeholder="ADD TASK...";inp.value=slot.task;
+    inp.oninput=e=>{slot.task=e.target.value.toUpperCase();saveSlots();updateProgress();};
+    row.appendChild(lbl);row.appendChild(inp);
+    area.appendChild(row);
+  });
+}
+
+// FEED (localStorage based - shared on same device, or use URL-based storage for multi-device)
+function loadFeed(){
+  renderFeedUI();
+}
+
+function renderFeedUI(){
+  const area=document.getElementById("listArea");
+  area.innerHTML=`<div id="feedTop"><div class="setupHint">TODAY'S PROOF WALL</div><button id="refreshBtn" onclick="loadFeed()">↻ REFRESH</button></div>`;
+
+  // Load all proof entries from localStorage
+  const allKeys=Object.keys(localStorage).filter(k=>k.startsWith("proof:") && k.includes(":"+getTodayKey()+":"));
+  const entries=allKeys.map(k=>{try{return JSON.parse(localStorage.getItem(k));}catch{return null;}}).filter(Boolean);
+  entries.sort((a,b)=>(b.time||0)-(a.time||0));
+
+  if(entries.length===0){
+    const empty=document.createElement("div");
+    empty.innerHTML=`<div style="text-align:center;padding:40px 20px"><div class="feedEmptyTitle">NOTHING HERE YET.</div><div class="feedEmptySub">BE THE FIRST TO PROVE YOURSELF.</div></div>`;
+    area.appendChild(empty);return;
+  }
+  entries.forEach(entry=>{
+    const card=document.createElement("div");card.className="feedCard";
+    card.innerHTML=`<img class="feedCardThumb" src="${entry.proof}" alt="proof"/>
+      <div class="feedMeta">
+        <div class="feedUser">${entry.user}</div>
+        <div class="feedTask">${entry.task}</div>
+        <div class="feedTime">${formatHour(entry.hour)}</div>
+        ${entry.note?`<div class="feedNote">"${entry.note}"</div>`:""}
+      </div><div class="feedArrow">›</div>`;
+    card.onclick=()=>openViewer(entry);
+    area.appendChild(card);
+  });
+}
+
+// MODAL
+function openModal(hour){
+  activeHour=hour;
+  tempProof=null;
+  const slot=mySlots.find(s=>s.hour===hour);
+  document.getElementById("modalTitle").textContent=slot.task;
+  document.getElementById("modalTime").textContent=formatHour(hour);
+  document.getElementById("noteInput").value="";
+  document.getElementById("uploadLabel").style.display="flex";
+  document.getElementById("proofPreviewWrap").style.display="none";
+  document.getElementById("doneBtn").className="";
+  document.getElementById("overlay").className="show";
+}
+
+function closeModal(){
+  document.getElementById("overlay").className="";
+  activeHour=null;tempProof=null;
+}
+
+// File inputs
+function handleFile(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    tempProof=ev.target.result;
+    document.getElementById("proofPreviewImg").src=tempProof;
+    document.getElementById("uploadLabel").style.display="none";
+    document.getElementById("proofPreviewWrap").style.display="flex";
+    document.getElementById("doneBtn").className="ready";
+  };
+  r.readAsDataURL(file);
+}
+document.getElementById("fileInput").onchange=e=>handleFile(e.target.files[0]);
+document.getElementById("fileInput2").onchange=e=>handleFile(e.target.files[0]);
+
+function submitProof(){
+  if(!tempProof||activeHour===null)return;
+  const note=document.getElementById("noteInput").value;
+  const slot=mySlots.find(s=>s.hour===activeHour);
+  slot.done=true;slot.proof=tempProof;slot.note=note;
+  saveSlots();
+  // Save to feed
+  const entry={user:username,task:slot.task,hour:activeHour,proof:tempProof,note:note,time:Date.now()};
+  localStorage.setItem("proof:"+username+":"+getTodayKey()+":"+activeHour,JSON.stringify(entry));
+  closeModal();
+  renderView();
+}
+
+// VIEWER
+function openViewer(entry){
+  document.getElementById("viewerEyebrow").textContent=(entry.user||username)+" · "+formatHour(entry.hour);
+  document.getElementById("viewerTitle").textContent=(entry.task||"").toUpperCase();
+  document.getElementById("viewerImg").src=entry.proof;
+  document.getElementById("viewerNote").textContent=entry.note?'"'+entry.note+'"':"";
+  document.getElementById("viewerOverlay").className="show";
+}
+function closeViewer(){document.getElementById("viewerOverlay").className="";}
+</script>
+</body>
+</html>
